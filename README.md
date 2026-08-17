@@ -72,7 +72,7 @@ Two executable scripts contain all four commands:
 
 
 
-`CUDA_VISIBLE_DEVICES` must expose the same number of GPUs as `num_processes`. To use a different topology, create another YAML and set `ACCELERATE_CONFIG_FILE=/path/to/config.yaml`; do not silently reuse a DeepSpeed or FSDP configuration.
+
 
 Run Stage I first:
 
@@ -80,34 +80,19 @@ Run Stage I first:
 CUDA_VISIBLE_DEVICES=0,1,2,3 bash train_stage_I.sh
 ```
 
-The Stage I defaults reproduce `train_stage_I.sh` from the full project:
 
-- dataset: `/data01/lg/OmniFix/stage-I-train-data/processed`
-- metadata: `dataset_ref_video_cam_pose.json`
-- fields: `video,control_video,reference_video,cam_pose`
-- resolution and length: `448x800`, 25 frames
-- dataset repeat: 10
-- epochs: 2
 
 After both Stage I runs finish, select the final checkpoint from each noise branch and run Stage II:
 
 ```bash
-SPVC_STAGE_I_HIGH_CHECKPOINT=/path/to/high_noise_stage_I/step-1040.safetensors \
+SPVC_STAGE_I_HIGH_CHECKPOINT=/path/to/high_noise_stage_I/step-2080.safetensors \
 SPVC_STAGE_I_LOW_CHECKPOINT=/path/to/low_noise_stage_I/step-2080.safetensors \
 CUDA_VISIBLE_DEVICES=0,1,2,3 \
 bash train_stage_II.sh
 ```
 
-The Stage II defaults reproduce `train_stage_II.sh` from the full project:
 
-- dataset: `/data01/hs/DiffSynth-Studio/stage-II-train-data/processed`
-- metadata: `dataset_ref_vid_cam_pose_with_bevbbox.json`
-- fields: `video,control_video,reference_video,cam_pose,reference_combined_video`
-- resolution and length: `448x800`, 25 frames
-- dataset repeat: 5
-- epochs: 2
 
-Checkpoint step numbers depend on dataset size, GPU process count, and Accelerate configuration. The Stage II script defaults to the checkpoints produced by the reference runs (`step-1040` for high noise and `step-2080` for low noise), but the two checkpoint variables should be overridden when the final filenames differ.
 
 The following environment variables make the scripts portable:
 
