@@ -36,20 +36,8 @@ pip install -e .
 
 This follows the source-install workflow recommended by [DiffSynth-Studio](https://github.com/modelscope/DiffSynth-Studio). Do not install the separate PyPI `diffsynth` package into this environment because SPVC includes its own minimized `diffsynth` package.
 
-A reproducible Conda specification is also included:
 
-```bash
-conda env create -f environment.yml
-conda activate spvc
-pip install -e . --no-deps
-```
 
-Verify the environment:
-
-```bash
-python -c "import torch, diffsynth; print(torch.__version__, torch.cuda.is_available())"
-python scripts/eval_novel_views.py --help
-```
 
 Model files are downloaded from Hugging Face into `./models` by default. Set `DIFFSYNTH_MODEL_BASE_PATH` to use another model directory.
 
@@ -72,14 +60,7 @@ Training metadata is a JSON list. Every item contains `prompt` and `video`, plus
 
 ## Training
 
-SPVC training has two curriculum stages, and each stage trains an independent high-noise and low-noise LoRA. This gives four training runs in total:
-
-| Run | Training data | Initialization | Timestep boundary |
-| --- | --- | --- | --- |
-| Stage I high noise | control, reference, camera pose | Wan high-noise base model | `[0, 0.358]` |
-| Stage I low noise | control, reference, camera pose | Wan low-noise base model | `[0.358, 1]` |
-| Stage II high noise | Stage I inputs plus HD map/bbox | Stage I high-noise LoRA | `[0, 0.358]` |
-| Stage II low noise | Stage I inputs plus HD map/bbox | Stage I low-noise LoRA | `[0.358, 1]` |
+SPVC training has two curriculum stages, and each stage trains an independent high-noise and low-noise LoRA. 
 
 Stage II high noise must load the Stage I high-noise checkpoint, while Stage II low noise must load the Stage I low-noise checkpoint.
 
@@ -88,28 +69,8 @@ Two executable scripts contain all four commands:
 - `train_stage_I.sh`: trains Stage I high noise and then Stage I low noise.
 - `train_stage_II.sh`: trains Stage II high noise and then Stage II low noise.
 
-The reference setup uses single-node, four-GPU PyTorch DDP through Accelerate. It does not use FSDP, DeepSpeed ZeRO-2/3, or Megatron. This is LoRA training rather than full-parameter Wan 14B training: the base model is replicated and frozen on every process, while LoRA and the camera-pose encoder are optimized. The training code loads model weights as BF16 itself and forces gradient checkpointing, so Accelerate uses `mixed_precision: "no"`.
 
-The repository includes `accelerate_config.yaml`, and both training scripts pass it explicitly. Its contents are:
 
-```yaml
-compute_environment: LOCAL_MACHINE
-debug: false
-distributed_type: MULTI_GPU
-downcast_bf16: "no"
-enable_cpu_affinity: false
-machine_rank: 0
-main_training_function: main
-mixed_precision: "no"
-num_machines: 1
-num_processes: 4
-rdzv_backend: static
-same_network: true
-tpu_env: []
-tpu_use_cluster: false
-tpu_use_sudo: false
-use_cpu: false
-```
 
 `CUDA_VISIBLE_DEVICES` must expose the same number of GPUs as `num_processes`. To use a different topology, create another YAML and set `ACCELERATE_CONFIG_FILE=/path/to/config.yaml`; do not silently reuse a DeepSpeed or FSDP configuration.
 
