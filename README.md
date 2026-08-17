@@ -94,34 +94,6 @@ bash train_stage_II.sh
 
 
 
-The following environment variables make the scripts portable:
-
-| Variable | Purpose |
-| --- | --- |
-| `SPVC_STAGE_I_DATA_ROOT` | Stage I processed-data root |
-| `SPVC_STAGE_I_METADATA` | Stage I metadata JSON |
-| `SPVC_STAGE_II_DATA_ROOT` | Stage II processed-data root |
-| `SPVC_STAGE_II_METADATA` | Stage II metadata JSON |
-| `SPVC_STAGE_I_HIGH_CHECKPOINT` | Stage I high-noise LoRA used to initialize Stage II high noise |
-| `SPVC_STAGE_I_LOW_CHECKPOINT` | Stage I low-noise LoRA used to initialize Stage II low noise |
-| `SPVC_OUTPUT_ROOT` | Directory containing all four output folders |
-| `SPVC_NUM_FRAMES` | Number of frames, default `25` |
-| `ACCELERATE_CONFIG_FILE` | Accelerate YAML; defaults to `./accelerate_config.yaml` |
-
-For example, an open-source installation can use custom dataset and output paths without editing the scripts:
-
-```bash
-SPVC_STAGE_I_DATA_ROOT=/datasets/spvc/stage-I \
-SPVC_OUTPUT_ROOT=/checkpoints/spvc \
-bash train_stage_I.sh
-
-SPVC_STAGE_II_DATA_ROOT=/datasets/spvc/stage-II \
-SPVC_OUTPUT_ROOT=/checkpoints/spvc \
-SPVC_STAGE_I_HIGH_CHECKPOINT=/checkpoints/spvc/Wan2.2-Fun-A14B-Control_high_noise_stage_I/final.safetensors \
-SPVC_STAGE_I_LOW_CHECKPOINT=/checkpoints/spvc/Wan2.2-Fun-A14B-Control_low_noise_stage_I/final.safetensors \
-bash train_stage_II.sh
-```
-
 ## Novel-view inference
 
 The inference entry point processes one sample at a time, like a conventional model inference script. It accepts the four SPVC conditions explicitly:
