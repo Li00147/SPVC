@@ -4,9 +4,8 @@
   <img src="assets/fig-1-teaser.png" alt="SPVC teaser" width="100%">
 </p>
 
-SPVC is a minimal Wan2.2-Fun-A14B-Control codebase for LoRA training and novel-view inference. It keeps only the DiffSynth components required by the SPVC workflow.
 
-The supported conditions are:
+SPVC supported conditions are:
 
 - control video
 - HD map and projected 3D bounding boxes
@@ -203,3 +202,7 @@ Use `--no-tiled` to disable tiled VAE processing. Use `--vram_limit` to set the 
 ## Scope and attribution
 
 This repository excludes unrelated DiffSynth model families, pipelines, demos, notebooks, backups, generated caches, and optional Wan modalities. See `NOTICE` for upstream attribution and `LICENSE` for license terms.
+
+## Acknowledgement
+
+Thanks for the excellent open-source work: [DiffSynth-Studio](https://github.com/modelscope/DiffSynth-Studio).
