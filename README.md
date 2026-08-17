@@ -1,4 +1,4 @@
-# SPVC
+# SPVC: Structured and Panoptic Video Fixing for Cross-Dataset Driving Scene Rendering
 
 <p align="center">
   <img src="assets/fig-1-teaser.png" alt="SPVC teaser" width="100%">
