@@ -1,5 +1,9 @@
 # SPVC
 
+<p align="center">
+  <img src="assets/fig-1-teaser.png" alt="SPVC teaser" width="100%">
+</p>
+
 SPVC is a minimal Wan2.2-Fun-A14B-Control codebase for LoRA training and novel-view inference. It keeps only the DiffSynth components required by the SPVC workflow.
 
 The supported conditions are:
