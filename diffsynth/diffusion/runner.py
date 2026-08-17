@@ -1,0 +1,67 @@
+import torch
+from tqdm import tqdm
+from accelerate import Accelerator
+from .training_module import DiffusionTrainingModule
+from .logger import ModelLogger
+
+
+def launch_training_task(
+    accelerator: Accelerator,
+    dataset: torch.utils.data.Dataset,
+    model: DiffusionTrainingModule,
+    model_logger: ModelLogger,
+    learning_rate: float = 1e-05,
+    weight_decay: float = 0.01,
+    num_workers: int = 1,
+    save_steps: int = None,
+    num_epochs: int = 1,
+    args=None,
+):
+    if args is not None:
+        learning_rate = args.learning_rate
+        weight_decay = args.weight_decay
+        num_workers = args.dataset_num_workers
+        save_steps = args.save_steps
+        num_epochs = args.num_epochs
+    optimizer = torch.optim.AdamW(
+        model.trainable_modules(), lr=learning_rate, weight_decay=weight_decay
+    )
+    scheduler = torch.optim.lr_scheduler.ConstantLR(optimizer)
+    dataloader = torch.utils.data.DataLoader(
+        dataset, shuffle=True, collate_fn=lambda x: x[0], num_workers=num_workers
+    )
+    model, optimizer, dataloader, scheduler = accelerator.prepare(
+        model, optimizer, dataloader, scheduler
+    )
+    total_training_steps = num_epochs * len(dataloader)
+    unwrapped_model = accelerator.unwrap_model(model)
+    if hasattr(unwrapped_model, "total_training_steps"):
+        unwrapped_model.total_training_steps = total_training_steps
+    stop_training = False
+    for epoch_id in range(num_epochs):
+        if stop_training:
+            break
+        for data in tqdm(dataloader):
+            with accelerator.accumulate(model):
+                optimizer.zero_grad()
+                if dataset.load_from_cache:
+                    loss = model({}, inputs=data)
+                else:
+                    loss = model(data)
+                accelerator.backward(loss)
+                optimizer.step()
+                model_logger.on_step_end(accelerator, model, save_steps, loss=loss)
+                scheduler.step()
+                if (
+                    total_training_steps is not None
+                    and unwrapped_model.current_step >= total_training_steps
+                ):
+                    if accelerator.is_main_process:
+                        print(
+                            f"Reached total_training_steps={total_training_steps}, stopping training."
+                        )
+                    stop_training = True
+                    break
+        if save_steps is None:
+            model_logger.on_epoch_end(accelerator, model, epoch_id)
+    model_logger.on_training_end(accelerator, model, save_steps)

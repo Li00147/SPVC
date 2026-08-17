@@ -1,0 +1,24 @@
+name: spvc
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10.1
+  - pip>=23
+  - ffmpeg
+  - pip:
+      - accelerate
+      - einops
+      - ftfy
+      - huggingface-hub
+      - imageio[ffmpeg]
+      - numpy
+      - peft
+      - Pillow
+      - protobuf
+      - regex
+      - safetensors
+      - sentencepiece
+      - torch>=2.0.0
+      - torchvision
+      - tqdm
+      - transformers

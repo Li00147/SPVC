@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spvc"
+version = "0.1.0"
+description = "SPVC training and novel-view evaluation based on Wan2.2-Fun-A14B-Control"
+readme = "README.md"
+requires-python = ">=3.10.1"
+license = {text = "Apache-2.0"}
+dependencies = [
+    "accelerate",
+    "einops",
+    "ftfy",
+    "huggingface-hub",
+    "imageio[ffmpeg]",
+    "numpy",
+    "peft",
+    "Pillow",
+    "protobuf",
+    "regex",
+    "safetensors",
+    "sentencepiece",
+    "torch>=2.0.0",
+    "torchvision",
+    "tqdm",
+    "transformers",
+]
+
+[tool.setuptools.packages.find]
+include = ["diffsynth*"]

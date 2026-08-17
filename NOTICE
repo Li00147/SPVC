@@ -1,0 +1,7 @@
+SPVC contains modified portions of DiffSynth-Studio.
+
+DiffSynth-Studio
+Copyright 2023 Zhongjie Duan
+https://github.com/modelscope/DiffSynth-Studio
+
+All Python files under diffsynth/ were reduced or modified for the SPVC Wan2.2-Fun-A14B-Control workflow. The training and evaluation entry points were also modified for this repository. DiffSynth-Studio and these derivative files are distributed under the Apache License 2.0.
