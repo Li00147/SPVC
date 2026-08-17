@@ -85,8 +85,8 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 bash train_stage_I.sh
 After both Stage I runs finish, select the final checkpoint from each noise branch and run Stage II:
 
 ```bash
-SPVC_STAGE_I_HIGH_CHECKPOINT=/path/to/high_noise_stage_I/step-2080.safetensors \
-SPVC_STAGE_I_LOW_CHECKPOINT=/path/to/low_noise_stage_I/step-2080.safetensors \
+SPVC_STAGE_I_HIGH_CHECKPOINT=/path/to/high_noise_stage_I/final.safetensors \
+SPVC_STAGE_I_LOW_CHECKPOINT=/path/to/low_noise_stage_I/final.safetensors \
 CUDA_VISIBLE_DEVICES=0,1,2,3 \
 bash train_stage_II.sh
 ```
