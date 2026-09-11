@@ -1,0 +1,5 @@
+nuscenes-devkit==1.2.0
+matplotlib==3.10.8
+numpy==1.26.4
+pyquaternion==0.9.9
+Pillow==12.1.1

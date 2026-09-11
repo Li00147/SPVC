@@ -12,6 +12,13 @@ from diffsynth.utils.data import VideoData, save_video
 
 DEFAULT_PROMPT = "Transform a low-quality autonomous driving video into a high-quality, realistic driving video with clear details and consistent motion."
 DEFAULT_NEGATIVE_PROMPT = "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走"
+SPVC_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_LORA_CKPT_HIGH = str(
+    SPVC_ROOT / "checkpoints" / "spvc_stage_I_high_noise.safetensors"
+)
+DEFAULT_LORA_CKPT_LOW = str(
+    SPVC_ROOT / "checkpoints" / "spvc_stage_I_low_noise.safetensors"
+)
 
 
 def load_video_frames(path, height, width, num_frames, name):
@@ -87,20 +94,18 @@ def build_pipeline(args):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Run SPVC inference with control video and optional structured conditions."
+        description="Run SPVC inference with control, HD-map/3D-bbox, reference-video, and camera-pose conditions."
     )
     parser.add_argument("--control_video", required=True)
     parser.add_argument(
         "--hdmap_bbox_video",
         "--reference_combined_video",
         dest="hdmap_bbox_video",
-        help="Optional video containing rendered HD-map and projected 3D-box conditions.",
     )
-    parser.add_argument("--reference_video", required=True)
+    parser.add_argument("--reference_video")
     parser.add_argument("--cam_pose")
-    parser.add_argument("--cam_pose_ckpt")
-    parser.add_argument("--lora_ckpt_high", required=True)
-    parser.add_argument("--lora_ckpt_low", required=True)
+    parser.add_argument("--lora_ckpt_high", default=DEFAULT_LORA_CKPT_HIGH)
+    parser.add_argument("--lora_ckpt_low", default=DEFAULT_LORA_CKPT_LOW)
     parser.add_argument("--lora_alpha", type=float, default=1.0)
     parser.add_argument("--output", default="outputs/spvc.mp4")
     parser.add_argument("--model_id", default="PAI/Wan2.2-Fun-A14B-Control")
@@ -145,27 +150,31 @@ def main():
         if args.hdmap_bbox_video
         else None
     )
-    reference_video = load_video_frames(
-        args.reference_video,
-        args.height,
-        args.width,
-        args.num_frames,
-        "Reference video",
+    reference_video = (
+        load_video_frames(
+            args.reference_video,
+            args.height,
+            args.width,
+            args.num_frames,
+            "Reference video",
+        )
+        if args.reference_video
+        else None
     )
     cam_pose = load_camera_pose(args.cam_pose) if args.cam_pose else None
     pipe = build_pipeline(args)
     if cam_pose is not None:
-        checkpoint = args.cam_pose_ckpt or args.lora_ckpt_high
         load_camera_pose_encoder(
             pipe,
-            checkpoint,
+            args.lora_ckpt_high,
             device=args.device,
             dtype=torch.bfloat16,
         )
     print(f"control_video: {args.control_video}")
     if args.hdmap_bbox_video:
         print(f"hdmap_bbox_video: {args.hdmap_bbox_video}")
-    print(f"reference_video: {args.reference_video}")
+    if args.reference_video:
+        print(f"reference_video: {args.reference_video}")
     if args.cam_pose:
         print(f"cam_pose: {args.cam_pose} {tuple(cam_pose.shape)}")
     with torch.inference_mode():

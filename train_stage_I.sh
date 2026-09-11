@@ -6,7 +6,12 @@ cd "${SPVC_ROOT}"
 
 export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0,1,2,3}"
 
-SPVC_STAGE_I_DATA_ROOT="${SPVC_STAGE_I_DATA_ROOT:-/data01/lg/OmniFix/stage-I-train-data/processed}"
+DEFAULT_SPVC_TRAIN_DATA_ROOT="${SPVC_ROOT}/spvc-train-data"
+if [[ ! -d "${DEFAULT_SPVC_TRAIN_DATA_ROOT}" && -d "${SPVC_ROOT}/../spvc-train-data" ]]; then
+  DEFAULT_SPVC_TRAIN_DATA_ROOT="${SPVC_ROOT}/../spvc-train-data"
+fi
+SPVC_TRAIN_DATA_ROOT="${SPVC_TRAIN_DATA_ROOT:-${DEFAULT_SPVC_TRAIN_DATA_ROOT}}"
+SPVC_STAGE_I_DATA_ROOT="${SPVC_STAGE_I_DATA_ROOT:-${SPVC_TRAIN_DATA_ROOT}/stage-I-train-data/processed}"
 SPVC_STAGE_I_METADATA="${SPVC_STAGE_I_METADATA:-${SPVC_STAGE_I_DATA_ROOT}/dataset_ref_video_cam_pose.json}"
 SPVC_OUTPUT_ROOT="${SPVC_OUTPUT_ROOT:-${SPVC_ROOT}/models/train}"
 SPVC_NUM_FRAMES="${SPVC_NUM_FRAMES:-25}"
@@ -33,14 +38,14 @@ SPVC_COMMON_ARGS=(
   --extra_inputs "control_video,reference_video,cam_pose"
 )
 
-"${SPVC_ACCELERATE[@]}" examples/wanvideo/model_training/train.py \
+"${SPVC_ACCELERATE[@]}" scripts/train.py \
   "${SPVC_COMMON_ARGS[@]}" \
   --model_id_with_origin_paths "PAI/Wan2.2-Fun-A14B-Control:high_noise_model/diffusion_pytorch_model*.safetensors,${SPVC_MODEL_COMMON}" \
   --output_path "${SPVC_OUTPUT_ROOT}/Wan2.2-Fun-A14B-Control_high_noise_stage_I" \
   --max_timestep_boundary 0.358 \
   --min_timestep_boundary 0
 
-"${SPVC_ACCELERATE[@]}" examples/wanvideo/model_training/train.py \
+"${SPVC_ACCELERATE[@]}" scripts/train.py \
   "${SPVC_COMMON_ARGS[@]}" \
   --model_id_with_origin_paths "PAI/Wan2.2-Fun-A14B-Control:low_noise_model/diffusion_pytorch_model*.safetensors,${SPVC_MODEL_COMMON}" \
   --output_path "${SPVC_OUTPUT_ROOT}/Wan2.2-Fun-A14B-Control_low_noise_stage_I" \

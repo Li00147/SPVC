@@ -35,7 +35,7 @@
 </p>
 
 
-SPVC supported conditions are:
+SPVC supports the following conditions:
 
 - control video
 - HD map and projected 3D bounding boxes
@@ -71,12 +71,18 @@ Install SPVC from the repository root:
 pip install -e .
 ```
 
-This follows the source-install workflow recommended by [DiffSynth-Studio](https://github.com/modelscope/DiffSynth-Studio). Do not install the separate PyPI `diffsynth` package into this environment because SPVC includes its own minimized `diffsynth` package.
+This follows the source-install workflow recommended by
+[DiffSynth-Studio](https://github.com/modelscope/DiffSynth-Studio). Do not
+install the separate PyPI `diffsynth` package into this environment because
+SPVC includes its own minimized `diffsynth` package.
 
+Model files are downloaded from Hugging Face into `./models` by default. To use
+an existing model directory, point `DIFFSYNTH_MODEL_BASE_PATH` to the directory
+that contains `PAI/Wan2.2-Fun-A14B-Control`:
 
-
-
-Model files are downloaded from Hugging Face into `./models` by default. Set `DIFFSYNTH_MODEL_BASE_PATH` to use another model directory.
+```bash
+export DIFFSYNTH_MODEL_BASE_PATH=/path/to/DiffSynth-Studio/models
+```
 
 ## Quick start
 
@@ -102,48 +108,67 @@ checkpoints/
 `-- spvc_low_noise.safetensors
 ```
 
-Then run both demos from the repository root:
+Run the NVS demo from the SPVC repository root:
 
 ```bash
-bash quick_start.sh
+python scripts/inference.py \
+  --control_video demo/NVS-Fix/control-video.mp4 \
+  --reference_video demo/NVS-Fix/reference-video.mp4 \
+  --hdmap_bbox_video demo/NVS-Fix/structured-condition.mp4 \
+  --cam_pose demo/NVS-Fix/camera-pose.pt \
+  --lora_ckpt_high checkpoints/spvc_high_noise.safetensors \
+  --lora_ckpt_low checkpoints/spvc_low_noise.safetensors \
+  --height 464 \
+  --width 800 \
+  --num_frames 25 \
+  --fps 12 \
+  --output demo/NVS-Fix/fixed-video.mp4
 ```
 
-The fixed videos are saved to:
-
-- `demo/NVS-Fix/fixed-video.mp4`
-- `demo/Panoptic-Fix/fixed-video.mp4`
-
-If your checkpoint filenames or locations differ, provide them without editing the script:
+Run the PanopticFix demo:
 
 ```bash
-SPVC_HIGH_NOISE_CKPT=/path/to/high_noise.safetensors \
-SPVC_LOW_NOISE_CKPT=/path/to/low_noise.safetensors \
-SPVC_CAMERA_POSE_CKPT=/path/to/relpose_ecam.safetensors \
-bash quick_start.sh
+python scripts/inference.py \
+  --control_video demo/Panoptic-Fix/control-video.mp4 \
+  --reference_video demo/Panoptic-Fix/reference-video.mp4 \
+  --lora_ckpt_high checkpoints/spvc_high_noise.safetensors \
+  --lora_ckpt_low checkpoints/spvc_low_noise.safetensors \
+  --height 464 \
+  --width 800 \
+  --num_frames 25 \
+  --fps 12 \
+  --output demo/Panoptic-Fix/fixed-video.mp4
 ```
+
+The fixed videos are saved to `demo/NVS-Fix/fixed-video.mp4` and
+`demo/Panoptic-Fix/fixed-video.mp4`. Replace either checkpoint path on the
+command line when using checkpoints with different filenames or locations.
 
 ## Example training data
 
-Download the [sample training data](https://drive.google.com/drive/folders/120HI_5RPTixDyt7Air3FhnW8X4odrQjW?usp=drive_link) and extract both folders into the repository root. The package provides two compact training sets for checking the complete data-loading and training workflow:
+Download the [sample training data](https://drive.google.com/drive/folders/120HI_5RPTixDyt7Air3FhnW8X4odrQjW?usp=drive_link). The package provides two
+training subsets for checking the complete data-loading and training workflow:
 
-- `spvc-stage-I-train-data`: 40 Stage I samples with degraded, clean-reference, and relative-camera-pose conditions.
-- `spvc-stage-II-train-data`: 60 Stage II samples that additionally include structured HD-map and projected 3D-bounding-box conditions.
+- `stage-I-train-data`: degraded videos, clean references, and relative camera
+  poses;
+- `stage-II-train-data`: the same conditions plus structured HD-map and
+  projected 3D-bounding-box videos.
 
 Their layouts are:
 
 ```text
-spvc-stage-I-train-data/processed/
-|-- spvc-stage-I-train-data.json
-|-- control_video/
-|-- gt/
-`-- rel_pose_condition/
-
-spvc-stage-II-train-data/processed/
-|-- spvc-stage-II-train-data.json
-|-- control_video/
-|-- gt/
-|-- nuscenes_combined_videos/
-`-- rel_pose_condition/
+spvc-train-data/
+|-- stage-I-train-data/processed/
+|   |-- dataset_ref_video_cam_pose.json
+|   |-- control_video/
+|   |-- gt/
+|   `-- rel_pose_condition/
+`-- stage-II-train-data/processed/
+    |-- dataset_ref_vid_cam_pose_with_bevbbox.json
+    |-- control_video/
+    |-- gt/
+    |-- nuscenes_combined_videos/
+    `-- rel_pose_condition/
 ```
 
 Each metadata file is a JSON list, and all media paths are relative to its `processed` directory. A Stage I item contains:
@@ -170,54 +195,61 @@ Videos are loaded as RGB frames. `cam_pose` is a PyTorch tensor with shape `(F, 
 
 ## Data construction
 
-The [`data-preprocess`](data-preprocess/) directory provides the data-construction utilities used to create paired degraded and reference videos. See the [data preprocessing guide](data-preprocess/README.md) for preparing DriveStudio/OmniRe checkpoints and generating underfitting, cross-view, and random-mask degradations with [`render_degradations.py`](data-preprocess/render_degradations.py).
+The [`data-preprocess`](data-preprocess/) directory separates the two condition
+construction workflows used by SPVC:
 
-These scripts reproduce the novel-view degradation pipeline described in the paper. They require a working DriveStudio environment, processed driving datasets, and the corresponding scene checkpoints, which are not bundled with this repository.
+- [Degraded-video generation](data-preprocess/degraded-video-generation/README.md)
+  uses
+  [`render_degradations.py`](data-preprocess/degraded-video-generation/render_degradations.py)
+  to create underfitting, cross-view, and random-mask control videos from
+  DriveStudio/OmniRe scene reconstructions.
+- [Structured-condition generation](data-preprocess/structured-condition-generation/README.md)
+  projects nuScenes HD-map layers and vehicle 3D bounding boxes into 25-frame
+  videos used by `reference_combined_video`.
+
+The degraded-video workflow requires a working DriveStudio environment,
+processed driving datasets, and the corresponding scene checkpoints. The
+structured-condition workflow requires nuScenes data and the 12 Hz annotations
+used by SPVC. These external datasets and checkpoints are not bundled with this
+repository.
 
 ## Training
 
-SPVC training has two curriculum stages, and each stage trains an independent high-noise and low-noise LoRA. 
-
-Stage II high noise must load the Stage I high-noise checkpoint, while Stage II low noise must load the Stage I low-noise checkpoint.
+SPVC training has two curriculum stages, and each stage trains an independent
+high-noise and low-noise LoRA. Stage II high noise must load the Stage I
+high-noise checkpoint, while Stage II low noise must load the Stage I low-noise
+checkpoint.
 
 Two executable scripts contain all four commands:
 
 - `train_stage_I.sh`: trains Stage I high noise and then Stage I low noise.
 - `train_stage_II.sh`: trains Stage II high noise and then Stage II low noise.
 
-
-
-
-
-
 Run Stage I with the included example data:
 
 ```bash
-SPVC_STAGE_I_DATA_ROOT="$PWD/spvc-stage-I-train-data/processed" \
-SPVC_STAGE_I_METADATA="$PWD/spvc-stage-I-train-data/processed/spvc-stage-I-train-data.json" \
+SPVC_STAGE_I_DATA_ROOT="/path/to/spvc-train-data/stage-I-train-data/processed" \
+SPVC_STAGE_I_METADATA="/path/to/spvc-train-data/stage-I-train-data/processed/dataset_ref_video_cam_pose.json" \
 CUDA_VISIBLE_DEVICES=0,1,2,3 \
 bash train_stage_I.sh
 ```
 
-
-
-After both Stage I runs finish, select one checkpoint from each noise branch and run Stage II with its example data:
+After both Stage I runs finish, select one checkpoint from each noise branch
+and run Stage II with its example data:
 
 ```bash
-SPVC_STAGE_II_DATA_ROOT="$PWD/spvc-stage-II-train-data/processed" \
-SPVC_STAGE_II_METADATA="$PWD/spvc-stage-II-train-data/processed/spvc-stage-II-train-data.json" \
+SPVC_STAGE_II_DATA_ROOT="/path/to/spvc-train-data/stage-II-train-data/processed" \
+SPVC_STAGE_II_METADATA="/path/to/spvc-train-data/stage-II-train-data/processed/dataset_ref_vid_cam_pose_with_bevbbox.json" \
 SPVC_STAGE_I_HIGH_CHECKPOINT=/path/to/high_noise_stage_I/final.safetensors \
 SPVC_STAGE_I_LOW_CHECKPOINT=/path/to/low_noise_stage_I/final.safetensors \
 CUDA_VISIBLE_DEVICES=0,1,2,3 \
 bash train_stage_II.sh
 ```
 
-
-
-
 ## Custom inference
 
-The inference entry point processes one sample at a time, like a conventional model inference script. It accepts the four SPVC conditions explicitly:
+The single-sample inference entry point accepts all four SPVC conditions
+explicitly:
 
 ```bash
 python scripts/inference.py \
@@ -225,28 +257,124 @@ python scripts/inference.py \
   --hdmap_bbox_video /path/to/rendered_hdmap_and_3d_bbox.mp4 \
   --reference_video /path/to/reference.mp4 \
   --cam_pose /path/to/relative_camera_pose.pt \
-  --cam_pose_ckpt /path/to/checkpoint_with_relpose_ecam.safetensors \
-  --lora_ckpt_high /path/to/high_noise_lora.safetensors \
-  --lora_ckpt_low /path/to/low_noise_lora.safetensors \
+  --lora_ckpt_high checkpoints/spvc_high_noise.safetensors \
+  --lora_ckpt_low checkpoints/spvc_low_noise.safetensors \
   --height 464 \
   --width 800 \
   --num_frames 25 \
   --output outputs/sample.mp4
 ```
 
-`--hdmap_bbox_video` is an alias for the model-side `reference_combined_video`. It must use the same rendering convention as the training data. The structured-condition video and camera pose are optional, so omit `--hdmap_bbox_video` and `--cam_pose` for samples that do not provide them. When camera-pose conditioning is enabled, `--cam_pose_ckpt` must contain `relpose_ecam` weights; if omitted, the high-noise LoRA checkpoint is used as the source.
+`--hdmap_bbox_video` is an alias for the model-side
+`reference_combined_video`. It must use the same rendering convention as the
+training data. If `--cam_pose` is omitted, camera-pose conditioning is disabled.
+When it is enabled, the camera-pose encoder weights are loaded automatically
+from the high-noise LoRA checkpoint.
 
-Use `--no-tiled` to disable tiled VAE processing. Use `--vram_limit` to set the available VRAM budget in GiB when layer-level offloading is enabled.
+Use `--lora_ckpt_high` and `--lora_ckpt_low` to select another compatible pair
+of high-noise and low-noise checkpoints. Use `--no-tiled` to disable tiled VAE
+processing, or `--vram_limit` to set the available VRAM budget in GiB when
+layer-level offloading is enabled.
+
+## Benchmark inference
+
+### Novel-view synthesis
+
+The NVS batch utility reads control videos, clean reference videos, structured
+HD-map/3D-bounding-box videos, and relative-camera-pose tensors. Validate all
+condition pairings before loading the model:
+
+```bash
+python evaluation/eval_novel_views.py \
+  --benchmark-root /path/to/SPVC-Benchmark/nuscenes \
+  --scenes all \
+  --dry-run
+```
+
+Run the complete benchmark or select comma-separated scene IDs:
+
+```bash
+python evaluation/eval_novel_views.py \
+  --benchmark-root /path/to/SPVC-Benchmark/nuscenes \
+  --ckpt-high-noise checkpoints/spvc_high_noise.safetensors \
+  --ckpt-low-noise checkpoints/spvc_low_noise.safetensors \
+  --scenes all
+
+python evaluation/eval_novel_views.py \
+  --benchmark-root /path/to/SPVC-Benchmark/nuscenes \
+  --ckpt-high-noise checkpoints/spvc_high_noise.safetensors \
+  --ckpt-low-noise checkpoints/spvc_low_noise.safetensors \
+  --scenes 001,062,365
+```
+
+The script prints the resolved control, reference, structured-condition, and
+camera-pose paths for every clip. Predictions are written to
+`results/videos/<scale>/` and `results/images/<scale>/` below the selected
+dataset root.
+
+### PanopticFix
+
+Run all PanopticFix test clips or a subset of scenes:
+
+```bash
+python evaluation/eval_edit_scene.py \
+  --input-dir /path/to/SPVC-PanopticFix-Benchmark/testset \
+  --gt-videos-dir /path/to/SPVC-PanopticFix-Benchmark/gt/videos \
+  --output-root /path/to/SPVC-PanopticFix-Benchmark/results \
+  --ckpt-high-noise checkpoints/spvc_high_noise.safetensors \
+  --ckpt-low-noise checkpoints/spvc_low_noise.safetensors \
+  --scenes all
+
+python evaluation/eval_edit_scene.py \
+  --input-dir /path/to/SPVC-PanopticFix-Benchmark/testset \
+  --gt-videos-dir /path/to/SPVC-PanopticFix-Benchmark/gt/videos \
+  --output-root /path/to/SPVC-PanopticFix-Benchmark/results \
+  --ckpt-high-noise checkpoints/spvc_high_noise.safetensors \
+  --ckpt-low-noise checkpoints/spvc_low_noise.safetensors \
+  --scenes 002,062
+```
+
+Generated videos and frames are saved under the benchmark's `results/`
+directory.
 
 ## Reproducing the paper
 
-To reproduce the quantitative results reported in the paper, follow the [evaluation guide](evaluation/README.md). It describes the benchmark layout, output naming convention, dependencies, and commands for computing FID, FVD, CLIP-F, and CLIP-V on nuScenes, Waymo, PandaSet, and the PanopticFix task.
+To reproduce the quantitative results reported in the paper, install the metric
+dependencies and follow the [evaluation guide](evaluation/README.md):
 
-- [Novel-view benchmark and test-set instructions](evaluation/README.md#test-sets)
-- [PanopticFix benchmark and evaluation protocol](evaluation/README.md#reproduce-panopticfix-quantitative-results)
+```bash
+python -m pip install -r evaluation/requirements.txt
+```
 
-Place generated results in the directory structure specified by the evaluation guide before running `evaluation/evaluate.sh` and `evaluation/cal_clip_metrics.py`.
+The guide documents the benchmark layouts, output naming conventions, pairing
+rules, and commands for the following protocols:
 
+- [NVS inference and evaluation](evaluation/README.md#nvs-inference-and-evaluation)
+- [PanopticFix evaluation](evaluation/README.md#panopticfix-evaluation)
+- [Test-set sources](evaluation/README.md#test-set-sources)
+
+Evaluate NVS predictions with CLIP-F, CLIP-V, FID, and both bundled FVD
+implementations:
+
+```bash
+bash evaluation/evaluate.sh \
+  --dataset nuscenes \
+  --scale 4.0 \
+  --device cuda:0 \
+  --clip-model /path/to/ViT-B-32.pt
+```
+
+Evaluate PanopticFix predictions with the same metrics plus FID-A:
+
+```bash
+bash evaluation/evaluate_panoptic_fix.sh \
+  --device cuda:0 \
+  --clip-model /path/to/ViT-B-32.pt \
+  --yolo-model /path/to/yolo11x.pt
+```
+
+Passing local CLIP and YOLO checkpoints prevents the evaluation tools from
+attempting network downloads on an offline machine.
 
 ## Scope and attribution
 

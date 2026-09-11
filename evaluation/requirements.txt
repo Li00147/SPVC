@@ -1,0 +1,10 @@
+av==16.1.0
+einops
+numpy==1.26.4
+opencv-python-headless
+Pillow==12.1.0
+pytorch-fid==0.3.0
+scipy==1.17.1
+tqdm==4.67.2
+ultralytics
+git+https://github.com/openai/CLIP.git
