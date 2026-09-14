@@ -13,27 +13,19 @@
 </p>
 
 <p align="center">
-  Gen Li<sup>1,2,&dagger;</sup>, Shu Han<sup>3,&dagger;</sup>, Yun Xi Qiao<sup>4</sup>, Cheng Bi<sup>5</sup>, Xunyang Dai<sup>5</sup>, Weiqing Xiao<sup>6</sup>, Bohan Li<sup>7</sup>, Hao Zhao<sup>1</sup>, and Chaojian Li<sup>8,*</sup>
+  Gen Li<sup>1,2,&dagger;</sup>, Shu Han<sup>3,&dagger;</sup>, Yun Xi Qiao<sup>4</sup>, Cheng Bi<sup>5</sup>, Xunyang Dai<sup>5</sup>,
   <br>
-  <sup>1</sup>Institute for AI Industry Research (AIR), Tsinghua University, Beijing, China
+  Weiqing Xiao<sup>6</sup>, Bohan Li<sup>7</sup>, Hao Zhao<sup>1</sup>, and Chaojian Li<sup>8,*</sup>
+</p>
+
+<p align="center">
+  <sup>1</sup>AIR, Tsinghua &nbsp;&middot;&nbsp; <sup>2</sup>ZJU &nbsp;&middot;&nbsp; <sup>3</sup>UW&ndash;Madison &nbsp;&middot;&nbsp; <sup>4</sup>Tsinghua
   <br>
-  <sup>2</sup>Zhejiang University, Hangzhou, China
-  <br>
-  <sup>3</sup>University of Wisconsin&ndash;Madison, Madison, WI, USA
-  <br>
-  <sup>4</sup>Tsinghua University, Beijing, China
-  <br>
-  <sup>5</sup>Great Wall Motor Company Limited, Baoding, China
-  <br>
-  <sup>6</sup>Nanjing University, Nanjing, China
-  <br>
-  <sup>7</sup>Shanghai Jiao Tong University, Shanghai, China
-  <br>
-  <sup>8</sup>The Hong Kong University of Science and Technology, Hong Kong SAR, China
-  <br>
-  <sup>&dagger;</sup>Gen Li and Shu Han contributed equally to this work.
-  <br>
-  <sup>*</sup>Chaojian Li is the corresponding author.
+  <sup>5</sup>GWM &nbsp;&middot;&nbsp; <sup>6</sup>NJU &nbsp;&middot;&nbsp; <sup>7</sup>SJTU &nbsp;&middot;&nbsp; <sup>8</sup>HKUST
+</p>
+
+<p align="center">
+  <sup>&dagger;</sup>Equal contribution: Gen Li and Shu Han. &nbsp;&middot;&nbsp; <sup>*</sup>Corresponding author: Chaojian Li.
 </p>
 
 <p align="center">
