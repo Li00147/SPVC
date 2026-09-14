@@ -6,10 +6,14 @@
   <a href="https://arxiv.org/abs/2608.17420"><strong>Paper</strong></a>
   &nbsp;|&nbsp;
   <a href="https://li00147.github.io/SPVC-Project-Page/"><strong>Project Page</strong></a>
+  &nbsp;|&nbsp;
+  <a href="https://drive.google.com/drive/folders/1aYXswvRi06QhRtfB2YZeIo9nYB8qZsRV?usp=drive_link"><strong>Checkpoints</strong></a>
+  &nbsp;|&nbsp;
+  <a href="https://drive.google.com/drive/folders/120HI_5RPTixDyt7Air3FhnW8X4odrQjW?usp=drive_link"><strong>Dataset</strong></a>
 </p>
 
 <p align="center">
-  Gen Li<sup>1,2,&dagger;</sup>, Shu Han<sup>3,&dagger;</sup>, Yun Xi Qiao<sup>4</sup>, Hua Chen<sup>5</sup>, Xuyang Dai<sup>5</sup>, Bohan Li<sup>6</sup>, Hao Zhao<sup>1</sup>, and Chaojian Li<sup>7,*</sup>
+  Gen Li<sup>1,2,&dagger;</sup>, Shu Han<sup>3,&dagger;</sup>, Yun Xi Qiao<sup>4</sup>, Cheng Bi<sup>5</sup>, Xunyang Dai<sup>5</sup>, Weiqing Xiao<sup>6</sup>, Bohan Li<sup>7</sup>, Hao Zhao<sup>1</sup>, and Chaojian Li<sup>8,*</sup>
   <br>
   <sup>1</sup>Institute for AI Industry Research (AIR), Tsinghua University, Beijing, China
   <br>
@@ -21,9 +25,11 @@
   <br>
   <sup>5</sup>Great Wall Motor Company Limited, Baoding, China
   <br>
-  <sup>6</sup>Shanghai Jiao Tong University, Shanghai, China
+  <sup>6</sup>Nanjing University, Nanjing, China
   <br>
-  <sup>7</sup>The Hong Kong University of Science and Technology, Hong Kong SAR, China
+  <sup>7</sup>Shanghai Jiao Tong University, Shanghai, China
+  <br>
+  <sup>8</sup>The Hong Kong University of Science and Technology, Hong Kong SAR, China
   <br>
   <sup>&dagger;</sup>Gen Li and Shu Han contributed equally to this work.
   <br>
